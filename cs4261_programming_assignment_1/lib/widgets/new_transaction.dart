@@ -4,6 +4,8 @@ import './adaptive_flat_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../widgets/adaptive_flat_button.dart';
 
 class NewTransaction extends StatefulWidget {
@@ -57,6 +59,17 @@ class _NewTransactionState extends State<NewTransaction> {
     });
   }
 
+  Future<void> _takePicture() async {
+    final imageFile = await ImagePicker.pickImage(
+      source: ImageSource.camera,
+    );
+    setState(() {
+      _titleController.text = "Example Title";
+      _amountController.text = "99";
+      _selectedDate = DateTime.now();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -95,15 +108,29 @@ class _NewTransactionState extends State<NewTransaction> {
                   ],
                 ),
               ),
-              RaisedButton(
-                color: Theme.of(context).primaryColor,
-                child: Text(
-                  'Add Transaction',
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.button.color,
-                  ),
+              Container(
+                height: 70,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    FlatButton.icon(
+                      icon: Icon(Icons.camera_alt),
+                      label: const Text('Receipt'),
+                      color: Theme.of(context).accentColor,
+                      onPressed: _takePicture, ////////////
+                    ),
+                    RaisedButton(
+                      color: Theme.of(context).primaryColor,
+                      child: Text(
+                        'Add Transaction',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.button.color,
+                        ),
+                      ),
+                      onPressed: _submitData,
+                    ),
+                  ],
                 ),
-                onPressed: _submitData,
               ),
             ],
           ),
