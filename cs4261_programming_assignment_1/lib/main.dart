@@ -102,9 +102,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
-
-  @override
   dispose() {
     super.dispose();
   }
@@ -146,7 +143,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
   }
 
-  void _deleteTransaction(String id) async {
+  void _deleteTransaction(String id) {
+    var url =
+        'https://cs4261programmingassignment1.firebaseio.com/transactions/' +
+            id +
+            '.json';
+
+    http.delete(url);
+
+    print('deleteTransaction');
     setState(() {
       _userTransactions.removeWhere((tx) => tx.id == id);
       print('update _userTransaction ' + id);
