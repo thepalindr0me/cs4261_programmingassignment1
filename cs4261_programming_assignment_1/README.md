@@ -1,6 +1,6 @@
 # cs4261_programming_assignment_1
 
-A new Flutter project.
+Expense tracker with Firebase database connection.
 
 ## Getting Started
 

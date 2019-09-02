@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:date_format/date_format.dart';
 
 import './widgets/new_transaction.dart';
 import './widgets/transaction_list.dart';
@@ -64,24 +66,46 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  final List<Transaction> _userTransactions = [];
+  List<Transaction> _userTransactions = [];
 
   bool _showChart = false;
 
+  void initialTransactions() async {
+    const url =
+        'https://cs4261programmingassignment1.firebaseio.com/transactions.json';
+
+    try {
+      final response = await http.get(url);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Transaction> loadedTransactions = [];
+      extractedData.forEach((txId, txData) {
+        loadedTransactions.add(Transaction(
+          id: txId,
+          title: txData['title'],
+          amount: txData['amount'],
+          date: DateTime.parse(txData['date']),
+        ));
+        setState(() {
+          _userTransactions = loadedTransactions;
+        });
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    print("initState()");
+    initialTransactions();
     super.initState();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    print(state);
-  }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   @override
   dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -97,20 +121,35 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void _addNewTransaction(
       String txTitle, double txAmount, DateTime chosenDate) {
-    final newTx = Transaction(
-      title: txTitle,
-      amount: txAmount,
-      date: chosenDate,
-      id: DateTime.now().toString(),
-    );
-    setState(() {
-      _userTransactions.add(newTx);
+    const url =
+        'https://cs4261programmingassignment1.firebaseio.com/transactions.json';
+    http
+        .post(
+      url,
+      body: json.encode({
+        'title': txTitle,
+        'amount': txAmount,
+        'date': formatDate(chosenDate, [yyyy, '-', mm, '-', dd]),
+      }),
+    )
+        .then((response) {
+      print(json.decode(response.body));
+      final newTx = Transaction(
+        title: txTitle,
+        amount: txAmount,
+        date: chosenDate,
+        id: json.decode(response.body)['name'],
+      );
+      setState(() {
+        _userTransactions.add(newTx);
+      });
     });
   }
 
-  void _deleteTransaction(String id) {
+  void _deleteTransaction(String id) async {
     setState(() {
       _userTransactions.removeWhere((tx) => tx.id == id);
+      print('update _userTransaction ' + id);
     });
   }
 
