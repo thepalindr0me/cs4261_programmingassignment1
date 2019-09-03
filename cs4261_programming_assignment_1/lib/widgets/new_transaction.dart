@@ -65,7 +65,7 @@ class _NewTransactionState extends State<NewTransaction> {
     );
     setState(() {
       _titleController.text = "Example Title";
-      _amountController.text = "99";
+      _amountController.text = "90";
       _selectedDate = DateTime.now();
     });
   }
